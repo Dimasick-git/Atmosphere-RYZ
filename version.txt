@@ -1,0 +1,9 @@
+# Ryazhenka version / Версия Ryazhenka
+#
+# EN: Edit the version number below and rebuild. This single value drives both the
+#     on-console display version ("Ryazhenka vX.Y.Z") and the GitHub release name.
+# RU: Поменяй номер версии ниже и пересобери. Это одно значение задаёт и версию,
+#     показываемую на консоли ("Ryazhenka vX.Y.Z"), и имя релиза на GitHub.
+#
+# Use a plain version like 8.0.0 (no leading "v"). Lines starting with # are ignored.
+8.0.0
