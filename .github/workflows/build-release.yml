@@ -1,9 +1,11 @@
 # Atmosphère-RYZ — automatic build & release
 #
-# EN: Builds the firmware on every push to main and publishes a release named
-#     "Ryazhenka v<version.txt>" with the patched artifacts. Also runnable manually.
-# RU: Собирает прошивку при каждом push в main и публикует релиз с именем
-#     "Ryazhenka v<version.txt>" и пропатченными артефактами. Можно запустить вручную.
+# EN: Builds the firmware on every push to main and publishes a clean release named
+#     "Ryazhenka v<version.txt>" containing a single atmosphere-ryz.zip
+#     (fusee.bin + atmosphere/ + switch/). Also runnable manually.
+# RU: Собирает прошивку при каждом push в main и публикует релиз
+#     "Ryazhenka v<version.txt>" с единственным архивом atmosphere-ryz.zip
+#     (fusee.bin + папки atmosphere/ и switch/). Можно запустить вручную.
 name: Build & Release
 
 on:
@@ -37,15 +39,12 @@ jobs:
       - name: Install toolchain packages & python deps
         run: |
           set -ux
-          # Toolchains / tools needed for a full Atmosphère build (image usually has them).
           dkp-pacman -Sy --noconfirm --needed \
             switch-dev switch-glm switch-libjpeg-turbo \
             devkitARM devkitarm-rules hactool || true
-          # Ensure pip is available (image ships python3 without pip).
-          (apt-get update && apt-get install -y --no-install-recommends python3-pip) \
+          (apt-get update && apt-get install -y --no-install-recommends python3-pip zip unzip) \
             || python3 -m ensurepip --upgrade \
             || dkp-pacman -S --noconfirm python-pip || true
-          # lz4 is required by the build; Pillow is required by insert_splash_screen.py.
           python3 -m pip install --no-cache-dir --break-system-packages lz4 Pillow \
             || python3 -m pip install --no-cache-dir lz4 Pillow
           python3 -c "import lz4, PIL; print('python deps OK')"
@@ -63,36 +62,52 @@ jobs:
           export DEVKITPRO=/opt/devkitpro
           export DEVKITA64=/opt/devkitpro/devkitA64
           export DEVKITARM=/opt/devkitpro/devkitARM
+          # Default target runs the dist packaging: produces
+          #   out/*/release/atmosphere-<ver>.zip  (atmosphere/ + switch/)
+          #   out/*/release/fusee.bin
+          # The Ryazhenka splash (img/splash.bin) is embedded into package3 by build_package3.py.
           make -j"$(nproc)"
 
-      - name: Inject Ryazhenka splash into package3
-        run: |
-          set -eux
-          if [ -f fusee/package3 ]; then
-            python3 utilities/insert_splash_screen.py img/splash.png fusee/package3
-          fi
-
-      - name: Package artifacts
+      - name: Assemble atmosphere-ryz.zip
         id: pkg
         run: |
           set -eux
-          VERSION="${{ steps.ver.outputs.version }}"
-          OUT="atmosphere-ryz-${VERSION}"
-          mkdir -p "dist/${OUT}"
-          # Collect the standard Atmosphère output layout if present.
-          [ -d out ]            && cp -r out/*            "dist/${OUT}/" 2>/dev/null || true
-          [ -f fusee/fusee.bin ] && cp fusee/fusee.bin     "dist/${OUT}/" 2>/dev/null || true
-          [ -f fusee/package3 ]  && cp fusee/package3      "dist/${OUT}/" 2>/dev/null || true
-          ( cd dist && zip -r "${OUT}.zip" "${OUT}" )
-          echo "zip=dist/${OUT}.zip" >> "$GITHUB_OUTPUT"
-          ls -la dist || true
+          REL_ZIP="$(ls out/*/release/atmosphere-*.zip 2>/dev/null | grep -v debug | head -n1)"
+          FUSEE="$(ls out/*/release/fusee.bin 2>/dev/null | head -n1)"
+          test -n "${REL_ZIP}" && test -f "${FUSEE}"
+          rm -rf stage atmosphere-ryz.zip
+          mkdir -p stage
+          unzip -q "${REL_ZIP}" -d stage          # -> stage/atmosphere, stage/switch
+          cp "${FUSEE}" stage/fusee.bin
+          ( cd stage && zip -r -q ../atmosphere-ryz.zip fusee.bin atmosphere switch )
+          echo "--- atmosphere-ryz.zip top-level contents ---"
+          ( cd stage && ls -la )
+          unzip -l atmosphere-ryz.zip | tail -n +1 | head -n 20
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: atmosphere-ryz-${{ steps.ver.outputs.version }}
-          path: dist/*.zip
-          if-no-files-found: warn
+          name: atmosphere-ryz
+          path: atmosphere-ryz.zip
+          if-no-files-found: error
+
+      - name: Delete previous release & tag (clean re-release)
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: v${{ steps.ver.outputs.version }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -u
+          REL_ID="$(curl -fsSL -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            "https://api.github.com/repos/${REPO}/releases/tags/${TAG}" \
+            | python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get('id',''))" 2>/dev/null || true)"
+          if [ -n "${REL_ID}" ]; then
+            curl -fsSL -X DELETE -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              "https://api.github.com/repos/${REPO}/releases/${REL_ID}" || true
+          fi
+          curl -fsSL -X DELETE -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            "https://api.github.com/repos/${REPO}/git/refs/tags/${TAG}" || true
 
       - name: Publish release
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
@@ -101,22 +116,10 @@ jobs:
           tag_name: v${{ steps.ver.outputs.version }}
           name: Ryazhenka v${{ steps.ver.outputs.version }}
           make_latest: true
-          files: dist/*.zip
+          files: atmosphere-ryz.zip
           body: |
-            ## 🍶 Atmosphère-RYZ — Ryazhenka v${{ steps.ver.outputs.version }}
+            Ryazhenka v${{ steps.ver.outputs.version }}
 
-            **🇷🇺 Это ПАТЧЕНАЯ неофициальная сборка Atmosphère.**
-            Не сообщайте о проблемах с ней командам Atmosphère / CNX / Horizon-OC.
-
-            **🇬🇧 This is a PATCHED, unofficial Atmosphère build.**
-            Do not report issues with it to the upstream Atmosphère / CNX / Horizon-OC teams.
-
-            ### Патчи / Patches
-            - 🎨 Логотип загрузки заменён на **Ryazhenka** (boot splash).
-            - 🔁 Компилируемый лого `boot` возвращён к оригиналу Atmosphère.
-            - 🌡️ Патч **AOTag** (PMC-доступ в `exosphere`, порт из Horizon-OC).
-            - 🏷️ Версия из `version.txt` → отображается на консоли как `Ryazhenka v${{ steps.ver.outputs.version }}`.
-
-            Собрано автоматически из коммита `${{ github.sha }}`.
+            Распакуйте `atmosphere-ryz.zip` в корень SD-карты.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
