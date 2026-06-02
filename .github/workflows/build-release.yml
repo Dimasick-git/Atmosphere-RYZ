@@ -36,13 +36,19 @@ jobs:
 
       - name: Install toolchain packages & python deps
         run: |
-          set -eux
-          # Toolchains / tools needed for a full Atmosphère build.
+          set -ux
+          # Toolchains / tools needed for a full Atmosphère build (image usually has them).
           dkp-pacman -Sy --noconfirm --needed \
             switch-dev switch-glm switch-libjpeg-turbo \
             devkitARM devkitarm-rules hactool || true
-          python3 -m pip install --no-cache-dir --break-system-packages lz4 Pillow || \
-            python3 -m pip install --no-cache-dir lz4 Pillow
+          # Ensure pip is available (image ships python3 without pip).
+          (apt-get update && apt-get install -y --no-install-recommends python3-pip) \
+            || python3 -m ensurepip --upgrade \
+            || dkp-pacman -S --noconfirm python-pip || true
+          # lz4 is required by the build; Pillow is required by insert_splash_screen.py.
+          python3 -m pip install --no-cache-dir --break-system-packages lz4 Pillow \
+            || python3 -m pip install --no-cache-dir lz4 Pillow
+          python3 -c "import lz4, PIL; print('python deps OK')"
 
       - name: Read version
         id: ver
