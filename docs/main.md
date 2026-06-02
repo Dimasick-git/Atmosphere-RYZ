@@ -39,7 +39,7 @@ Atmosphere-CNX. Сохраняет многослойную архитектур
 ### Изменения Ryazhenka относительно базы
 
 - Загрузочный splash заменён на Ryazhenka (`img/splash.png` -> `fusee/package3`).
-- Компилируемый лого модуля `boot` возвращён к оригиналу Atmosphère.
+- Компилируемый лого модуля `boot` тоже заменён на логотип Ryazhenka.
 - Патч AOTag: доступ к PMC в `exosphere` (порт из Horizon-OC) для термодатчика aotag.
 - Версия задаётся файлом [`version.txt`](../version.txt) (`Ryazhenka vX.Y.Z`).
 - Автосборка/авто-релиз и авто-PR синхронизации с upstream (GitHub Actions).

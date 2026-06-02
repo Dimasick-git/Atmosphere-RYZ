@@ -9,7 +9,7 @@ Atmosphère.
 ## Ryazhenka v8.0.0
 + Форк на базе Atmosphere-CNX с полностью удалённым брендингом CNX.
 + Загрузочный splash заменён на логотип Ryazhenka (`img/splash.png`, `img/splash.bin`).
-+ Компилируемый лого модуля `boot` возвращён к оригиналу Atmosphère.
++ Компилируемый лого модуля `boot` тоже заменён на полноэкранный логотип Ryazhenka.
 + Добавлен патч AOTag в `exosphere` (доступ к PMC, порт из Horizon-OC; только PMC).
 + Версия вынесена в редактируемый файл `version.txt` (`Ryazhenka vX.Y.Z`).
 + Добавлена автосборка и авто-релиз (GitHub Actions).
