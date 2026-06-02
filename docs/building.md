@@ -1,59 +1,50 @@
-# Building Atmosphère-RYZ / Сборка Atmosphère-RYZ
+# Building Atmosphère-RYZ
 
-## 🇬🇧 English (short)
+## English (summary)
 
-Building relies almost entirely on the [devkitPro](https://devkitpro.org)
-toolchain. You normally do **not** need to build locally — every push to `main`
-is built automatically by GitHub Actions (see `.github/workflows/build-release.yml`).
-To build by hand, install devkitA64/devkitARM, run `scripts/apply_version.sh`,
-then `make`, then inject the splash with `utilities/insert_splash_screen.py`.
+The build uses the devkitPro toolchain (devkitA64 + devkitARM). Local builds are
+optional: every push to `main` is built by GitHub Actions
+(`.github/workflows/build-release.yml`) in the `devkitpro/devkita64` container.
+Manual build: install the toolchain and `lz4`/`Pillow`, run
+`scripts/apply_version.sh`, run `make`, then inject the splash with
+`utilities/insert_splash_screen.py`.
 
-## 🇷🇺 Русский (подробно)
+## Русский (подробно)
 
-Сборка почти полностью опирается на тулчейн [devkitPro](https://devkitpro.org).
-
-> 💡 В большинстве случаев собирать вручную **не нужно**: при каждом push в `main`
-> GitHub Actions сам собирает прошивку и публикует релиз. Ручная сборка нужна
-> только для локальной разработки.
+Сборка опирается на тулчейн [devkitPro](https://devkitpro.org). Локальная сборка
+не обязательна: при каждом push в `main` прошивка собирается в GitHub Actions
+(контейнер `devkitpro/devkita64`) и публикуется релиз.
 
 ### Зависимости
 
-+ [devkitA64](https://devkitpro.org)
-+ [devkitARM](https://devkitpro.org)
-+ [Python 3](https://www.python.org)
-+ [LZ4](https://pypi.org/project/lz4)
-+ [Pillow](https://pypi.org/project/Pillow) (для генерации splash, опционально)
-+ [PyCryptodome](https://pypi.org/project/pycryptodome) (опционально)
-+ [hactool](https://github.com/SciresM/hactool)
+- devkitA64, devkitARM (devkitPro);
+- Python 3;
+- `lz4` (требуется сборкой);
+- `Pillow` (требуется `utilities/insert_splash_screen.py`);
+- `hactool`.
 
-### Инструкция (ручная сборка)
+### Ручная сборка
 
-1. Установи и настрой devkitPro по [официальному гайду](https://devkitpro.org/wiki/Getting_Started).
-2. Через `(dkp-)pacman` поставь пакеты:
-   + `switch-dev`
-   + `switch-glm`
-   + `switch-libjpeg-turbo`
-   + `devkitARM`
-   + `devkitarm-rules`
-   + `hactool`
-3. Через `pip` поставь библиотеку, нужную для [exosphère](components/exosphere.md):
-   + `lz4`
+1. Установить и настроить devkitPro: https://devkitpro.org/wiki/Getting_Started
+2. Установить пакеты через `(dkp-)pacman`:
+   `switch-dev`, `switch-glm`, `switch-libjpeg-turbo`, `devkitARM`,
+   `devkitarm-rules`, `hactool`.
+3. Установить Python-модули: `pip install lz4 Pillow`.
 4. Применить версию из `version.txt`:
    ```sh
    scripts/apply_version.sh
    ```
-5. Собрать всё из корня репозитория:
+5. Собрать из корня репозитория:
    ```sh
    make
    ```
-6. Встроить логотип Ryazhenka в собранный `package3`:
+6. Встроить splash Ryazhenka в `package3`:
    ```sh
    python utilities/insert_splash_screen.py img/splash.png fusee/package3
    ```
 
-### Автосборка (рекомендуется)
+### Автоматическая сборка
 
-Просто запушь изменения в `main`. Workflow `build-release` соберёт прошивку в
-официальном Docker‑образе `devkitpro/devkita64`, применит версию из `version.txt`,
-встроит splash и опубликует релиз `Ryazhenka vX.Y.Z` с артефактами. Подробнее —
-в [faq.md](faq.md).
+Push в `main` запускает workflow `build-release`: применяется версия из
+`version.txt`, выполняется `make`, встраивается splash, артефакты упаковываются и
+публикуется релиз `Ryazhenka vX.Y.Z`. Подробности — в [faq.md](faq.md).

@@ -1,16 +1,39 @@
 # exosphère
-exosphère is a customized reimplementation of the Horizon OS's Secure Monitor.
-The Secure Monitor follows the same design principle as Arm's TrustZone and both terms can be used interchangeably in this context. It runs at the highest privilege mode (EL3) available to the main processor and is responsible for all the sensitive cryptographic operations needed by the system as well as power management for each CPU.
 
-## Extensions
-exosphère expands the original Secure Monitor design by providing custom SMCs (Secure Monitor Calls) necessary to the homebrew ecosystem. Currently, these are:
+## English (summary)
+
+exosphère is a reimplementation of the Horizon OS Secure Monitor (TrustZone). It
+runs at EL3, handling sensitive cryptographic operations and per-CPU power
+management. It adds custom SMCs and configuration items for the homebrew
+ecosystem. Ryazhenka note: the AOTag patch lives here — it adds an `RtcPmc`
+register access table so the secure monitor permits the PMC access required by the
+aotag thermal sensor (PMC only, no RAM/EMC overclock).
+
+## Русский (подробно)
+
+exosphère — кастомная реимплементация Secure Monitor (он же TrustZone) ОС Horizon.
+Работает в режиме наивысшей привилегии (EL3) основного процессора и отвечает за
+чувствительные криптографические операции и управление питанием каждого CPU.
+
+Замечание Ryazhenka: патч AOTag находится в этом компоненте. Он добавляет таблицу
+доступа `RtcPmcAccessTable` (порт из Horizon-OC), разрешающую запись в PMC-регистры,
+необходимую термодатчику aotag. Включена только PMC-часть; разгон RAM (EMC) не
+добавляется. См. `exosphere/program/source/smc/secmon_smc_register_access.cpp`.
+
+## Расширения / Extensions
+
+exosphère добавляет к оригинальному Secure Monitor собственные SMC (Secure Monitor
+Calls), необходимые экосистеме homebrew:
+
 ```
 uint32_t smc_ams_iram_copy(smc_args_t *args);
 uint32_t smc_ams_write_address(smc_args_t *args);
 uint32_t smc_ams_get_emummc_config(smc_args_t *args);
 ```
 
-Additionally, exosphère expands the functionality of two SMCs provided by the Horizon OS for getting/setting configuration items. The following custom configuration items are provided by exosphère:
+Также расширяется функциональность двух стандартных SMC получения/установки
+элементов конфигурации. Собственные элементы конфигурации exosphère:
+
 ```
 CONFIGITEM_EXOSPHERE_VERSION = 65000,
 CONFIGITEM_NEEDS_REBOOT = 65001,
@@ -22,55 +45,48 @@ CONFIGITEM_ALLOW_CAL_WRITES = 65006,
 ```
 
 ### smc_ams_iram_copy
-This function implements a copy of up to one page between DRAM and IRAM. Its arguments are:
+
+Копирование до одной страницы между DRAM и IRAM. Аргументы:
+
 ```
-args->X[1] = DRAM address (translated by kernel), must be 4-byte aligned.
-args->X[2] = IRAM address, must be 4-byte aligned.
-args->X[3] = Size (must be <= 0x1000 and 4-byte aligned).
-args->X[4] = 0 for read, 1 for write.
+args->X[1] = адрес в DRAM (транслируется ядром), выравнивание по 4 байтам.
+args->X[2] = адрес в IRAM, выравнивание по 4 байтам.
+args->X[3] = размер (<= 0x1000, выравнивание по 4 байтам).
+args->X[4] = 0 — чтение, 1 — запись.
 ```
 
 ### smc_ams_write_address
-This function implements a write to a DRAM page. Its arguments are:
+
+Запись в страницу DRAM. Аргументы:
+
 ```
-args->X[1] = Virtual address, must be size-bytes aligned and readable by EL0.
-args->X[2] = Value.
-args->X[3] = Size (must be 1, 2, 4, or 8).
+args->X[1] = виртуальный адрес, выравнивание по размеру, читаемый из EL0.
+args->X[2] = значение.
+args->X[3] = размер (1, 2, 4 или 8).
 ```
 
 ### smc_ams_get_emummc_config
-This function retrieves configuration for the current [emummc](emummc.md) context. Its arguments are:
+
+Получение конфигурации текущего контекста [emummc](emummc.md). Аргументы:
+
 ```
-args->X[1] = MMC id, must be size-bytes aligned and readable by EL0.
-args->X[2] = Pointer to output (for paths for filebased + nintendo dir), must be at least 0x100 bytes.
+args->X[1] = MMC id, выравнивание по размеру, читаемый из EL0.
+args->X[2] = указатель на вывод (пути для file-based + nintendo dir), не менее 0x100 байт.
 ```
 
-### CONFIGITEM_EXOSPHERE_VERSION
-This custom configuration item gets information about the current exosphere version.
+### Элементы конфигурации
 
-### CONFIGITEM_NEEDS_REBOOT
-This custom configuration item is used to issue a system reboot into RCM or into a warmboot payload leveraging a secondary vulnerability to achieve code execution from warm booting.
+- `CONFIGITEM_EXOSPHERE_VERSION` — версия exosphère.
+- `CONFIGITEM_NEEDS_REBOOT` — перезагрузка в RCM или warmboot-payload.
+- `CONFIGITEM_NEEDS_SHUTDOWN` — выключение через warmboot-payload.
+- `CONFIGITEM_EXOSPHERE_VERHASH` — git-хэш текущей сборки exosphère.
+- `CONFIGITEM_HAS_RCM_BUG_PATCH` — пропатчена ли уязвимость CVE-2018-6242.
+- `CONFIGITEM_SHOULD_BLANK_PRODINFO` — симулировать ли «пустой» PRODINFO
+  (см. [configurations.md](../features/configurations.md)).
+- `CONFIGITEM_ALLOW_CAL_WRITES` — разрешать ли запись в раздел калибровки.
 
-### CONFIGITEM_NEEDS_SHUTDOWN
-This custom configuration item is used to issue a system shutdown with a warmboot payload leveraging a secondary vulnerability to achieve code execution from warm booting.
+## Встроенные payload'ы
 
-### CONFIGITEM_EXOSPHERE_VERHASH
-This custom configuration item gets information about the current exosphere git commit hash.
-
-### CONFIGITEM_HAS_RCM_BUG_PATCH
-This custom configuration item gets whether the unit has the CVE-2018-6242 vulnerability patched.
-
-### CONFIGITEM_SHOULD_BLANK_PRODINFO
-This custom configuration item gets whether the unit should simulate a "blanked" PRODINFO. See [here](../features/configurations.md) for more information.
-
-### CONFIGITEM_ALLOW_CAL_WRITES
-This custom configuration item gets whether the unit should allow writing to the calibration partition.
-
-## lp0fw
-This is a small, built-in payload that is responsible for waking up the system during a warm boot.
-
-## sc7fw
-This is a small, built-in payload that is responsible for putting the system to sleep during a warm boot.
-
-## rebootstub
-This is a small, built-in payload that provides functionality to reboot the system into any payload of choice.
+- `lp0fw` — пробуждение системы при warm boot.
+- `sc7fw` — перевод системы в сон при warm boot.
+- `rebootstub` — перезагрузка системы в произвольный payload.

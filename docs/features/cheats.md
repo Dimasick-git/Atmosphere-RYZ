@@ -1,5 +1,38 @@
 # Cheats
-Atmosphère supports Action-Replay style cheat codes, with cheats loaded off of the SD card.
+
+## English (summary)
+
+Atmosphère supports Action-Replay style cheat codes loaded from the SD card. The
+loading process, compatibility notes, and the full cheat-code opcode/VM reference
+are documented below. The opcode reference is a precise technical specification and
+is kept in English to avoid translation errors.
+
+## Русский (обзор)
+
+Atmosphère поддерживает чит-коды в стиле Action-Replay, загружаемые с SD-карты.
+
+Логика загрузки (по умолчанию):
+
+- информация о новом процессе приложения берётся из `pm` и `loader`;
+- проверяется удержание заданной комбинации кнопок (по умолчанию «L не удерживается»;
+  настраивается ключом `cheat_enable_key`);
+- проверяется, что процесс — реальное приложение (а не Homebrew Loader);
+- читы загружаются из `/atmosphere/contents/<program_id>/cheats/<build_id>.txt`,
+  где `build_id` — hex первых 8 байт build id основного исполняемого файла;
+- открывается отладочная сессия ядра, и сигнализируется системное событие.
+
+Дополнительно:
+
+- `ForceOpenCheatProcess` / `ForceCloseCheatProcess` — service API для принудительного
+  подключения/отключения менеджера читов;
+- поведение «включать все читы по умолчанию» настраивается системной настройкой
+  `atmosphere!dmnt_cheats_enabled_by_default` (см. [configurations.md](configurations.md));
+- homebrew может включать/выключать читы во время выполнения через service API.
+
+Ниже приведён полный технический справочник по формату чит-кодов (опкоды VM).
+Он сохранён на английском как точная спецификация.
+
+---
 
 ## Cheat Loading Process
 By default, Atmosphère will do the following when deciding whether to attach to a new application process:

@@ -1,12 +1,12 @@
-# Roadmap / Планы
+# Roadmap
 
-> 🇬🇧 **EN (short):** Atmosphère-RYZ has no separate roadmap — it follows
-> upstream Atmosphère. The original upstream roadmap is preserved below for
-> reference.
->
-> 🇷🇺 **RU:** У Atmosphère‑RYZ нет отдельного роадмапа — форк следует за
-> оригинальной Atmosphère (новые версии подтягиваются через авто‑PR). Ниже —
-> сохранённый оригинальный роадмап Atmosphère для справки.
+EN (summary): Atmosphère-RYZ has no separate roadmap; it follows upstream
+Atmosphère (new changes arrive via the upstream-sync pull request). The original
+upstream roadmap is preserved below for reference.
+
+RU: У Atmosphère-RYZ нет отдельного роадмапа — форк следует за оригинальной
+Atmosphère (изменения подтягиваются через авто-PR синхронизации). Ниже сохранён
+оригинальный роадмап Atmosphère для справки.
 
 ---
 

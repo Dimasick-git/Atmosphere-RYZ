@@ -1,11 +1,18 @@
 # libraries
-This is a collection of libraries for doing operating system development for the Nintendo Switch.
 
-## libmesosphere
-libmesosphere is a work-in-progress C++ library implementing functionality for the Horizon Kernel.
+## English (summary)
 
-## libstratosphere
-libstratosphere is a work-in-progress C++ library for development of system modules for the Nintendo Switch.
+A collection of C++ libraries for Nintendo Switch OS development: libmesosphere
+(Horizon kernel functionality), libstratosphere (system-module development), and
+libvapours (shared boilerplate).
 
-## libvapours
-Common boilerplate code for various purposes. 
+## Русский (подробно)
+
+Набор C++ библиотек для разработки ОС под Nintendo Switch.
+
+- libmesosphere — функциональность ядра Horizon (в разработке);
+- libstratosphere — разработка системных модулей (в разработке);
+- libvapours — общий вспомогательный код.
+
+Замечание Ryazhenka: патч AOTag использует таблицы доступа secure monitor в
+`libexosphere`/`exosphere` (регион `RtcPmc`).

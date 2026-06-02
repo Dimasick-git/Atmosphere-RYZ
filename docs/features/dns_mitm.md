@@ -1,53 +1,66 @@
 # DNS.mitm
-As of 0.18.0, atmosphère provides a mechanism for redirecting DNS resolution requests.
 
-By default, atmosphère redirects resolution requests for official telemetry servers, redirecting them to a loopback address.
+## English (summary)
 
-## Hosts files
+DNS.mitm redirects DNS resolution requests. By default it redirects Nintendo
+telemetry servers to a loopback address. It is configured via an extended `hosts`
+file format parsed once at startup. Hosts file selection order, atmosphère
+defaults, debug logging, and a full opt-out are described below.
 
-DNS.mitm can be configured through the usage of a slightly-extended `hosts` file format, which is parsed only once on system startup.
+## Русский (подробно)
 
-In particular, hosts files parsed by DNS.mitm have the following extensions to the usual format:
-+ `*` is treated as a wildcard character, matching any collection of 0 or more characters wherever it occurs in a hostname.
-+ `%` is treated as a stand-in for the value of `nsd!environment_identifier`. This is always `lp1`, on production devices.
+DNS.mitm (доступен начиная с 0.18.0) перенаправляет запросы разрешения DNS. По
+умолчанию перенаправляет запросы к официальным серверам телеметрии Nintendo на
+loopback-адрес.
 
-If multiple entries in a host file match a domain, the last-defined match is used.
+### Файлы hosts
 
-Please note that homebrew may trigger a hosts file re-parse by sending the extension IPC command 65000 ("AtmosphereReloadHostsFile") to a connected `sfdnsres` session.
+DNS.mitm настраивается через слегка расширенный формат файла `hosts`, который
+разбирается один раз при запуске системы. Расширения формата:
 
-### Hosts file selection
+- `*` — символ подстановки, соответствует 0 или более любым символам в имени хоста;
+- `%` — подстановка значения `nsd!environment_identifier` (на розничных устройствах
+  всегда `lp1`).
 
-Atmosphère will try to read hosts from the following file paths, in order, stopping once it successfully performs a file read:
+Если домену соответствуют несколько записей, используется последняя по порядку.
 
-+ (emummc only) `/atmosphere/hosts/emummc_%04lx.txt`, formatted with the emummc's id number (see `emummc.ini`).
-+ (emummc only) `/atmosphere/hosts/emummc.txt`.
-+ (sysmmc only) `/atmosphere/hosts/sysmmc.txt`.
-+ `/atmosphere/hosts/default.txt`
+Homebrew может инициировать повторный разбор файла hosts, отправив расширенную
+IPC-команду 65000 («AtmosphereReloadHostsFile») в сессию `sfdnsres`.
 
-If `/atmosphere/hosts/default.txt` does not exist, atmosphère will create it to contain the defaults.
+### Выбор файла hosts
 
-### Atmosphère defaults
+Atmosphère читает hosts из следующих путей по порядку, останавливаясь на первом
+успешно прочитанном:
 
-By default, atmosphère's default redirections are parsed **in addition to** the contents of the loaded hosts file.
+- (только emummc) `/atmosphere/hosts/emummc_%04lx.txt` (с id из `emummc.ini`);
+- (только emummc) `/atmosphere/hosts/emummc.txt`;
+- (только sysmmc) `/atmosphere/hosts/sysmmc.txt`;
+- `/atmosphere/hosts/default.txt`.
 
-This is equivalent to thinking of the loaded hosts file as having the atmosphère defaults prepended to it.
+Если `default.txt` отсутствует, Atmosphère создаёт его со значениями по умолчанию.
 
-This setting is considered desirable, because it minimizes the telemetry risks if a user forgets to update a custom hosts file on a system update which changes the telemetry servers.
+### Значения по умолчанию
 
-This behavior can be opted-out from by setting `atmosphere!add_defaults_to_dns_hosts = u8!0x0` in `system_settings.ini`.
+По умолчанию перенаправления Atmosphère применяются дополнительно к содержимому
+загруженного файла hosts (как если бы они были добавлены в начало файла). Это
+снижает риск утечки телеметрии, если пользователь забыл обновить свой hosts при
+обновлении системы. Отключается через `atmosphere!add_defaults_to_dns_hosts = u8!0x0`
+в `system_settings.ini`.
 
-The current default redirections are:
+Текущие перенаправления по умолчанию:
 
 ```
-# Nintendo telemetry servers
+# Серверы телеметрии Nintendo
 127.0.0.1 receive-%.dg.srv.nintendo.net receive-%.er.srv.nintendo.net
 ```
 
-## Debugging
+### Отладка
 
-On startup (or on hosts file re-parse), DNS.mitm will log both what hosts file it selected and the contents of all redirections it parses to `/atmosphere/logs/dns_mitm_startup.log`.
+При запуске (или повторном разборе) DNS.mitm пишет в
+`/atmosphere/logs/dns_mitm_startup.log` выбранный файл hosts и все перенаправления.
+При `atmosphere!enable_dns_mitm_debug_log = u8!0x1` в `system_settings.ini` все
+запросы GetHostByName/GetAddrInfo логируются в `/atmosphere/logs/dns_mitm_debug.log`.
 
-In addition, if the user sets `atmosphere!enable_dns_mitm_debug_log = u8!0x1` in `system_settings.ini`, DNS.mitm will log all requests to GetHostByName/GetAddrInfo to `/atmosphere/logs/dns_mitm_debug.log`. All redirections will be noted when they occur.
+### Полное отключение
 
-## Opting-out of DNS.mitm entirely
-If you wish to disable DNS.mitm entirely, `system_settings.ini` can be edited to set `atmosphere!enable_dns_mitm = u8!0x0`.
+Установить `atmosphere!enable_dns_mitm = u8!0x0` в `system_settings.ini`.

@@ -1,5 +1,12 @@
 # troposphère
-troposphère provides customization of the Horizon OS at the application level.
 
-## reboot_to_payload
-Sample application to perform a system reboot into a payload of choice.
+## English (summary)
+
+troposphère customizes Horizon OS at the application level. Example:
+reboot_to_payload, an application that reboots the system into a chosen payload.
+
+## Русский (подробно)
+
+troposphère кастомизирует Horizon OS на уровне приложений.
+
+- reboot_to_payload — приложение для перезагрузки системы в выбранный payload.

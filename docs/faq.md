@@ -1,60 +1,61 @@
-# FAQ / Частые вопросы — Atmosphère-RYZ
+# FAQ — Atmosphère-RYZ
 
-## 🇬🇧 English (short)
+## English (summary)
 
-Common questions about the Ryazhenka fork: how versioning works, how the
-auto-build/release works, what the AOTag patch does, and where the splash comes
-from. Full answers in Russian below.
+Covers: what this fork is, how versioning works, how the automatic build/release
+works, what the AOTag patch does, the boot splash, and upstream synchronization.
+Details in Russian below.
 
-## 🇷🇺 Русский (подробно)
+## Русский (подробно)
 
-### Что такое Atmosphère‑RYZ?
+### Что такое Atmosphère-RYZ
 
-Пропатченный форк Atmosphère на базе Atmosphere‑CNX, с убранным брендингом CNX,
-логотипом Ryazhenka, патчем AOTag из Horizon‑OC и автосборкой. Это
-**неофициальная** сборка — не пиши о её проблемах командам Atmosphère/CNX/Horizon‑OC.
+Пропатченный форк Atmosphère на базе Atmosphere-CNX: брендинг CNX удалён, добавлены
+логотип Ryazhenka, патч AOTag (из Horizon-OC), версионирование через `version.txt`
+и CI. Неофициальная сборка — проблемы с ней не следует сообщать командам
+Atmosphère / CNX / Horizon-OC.
 
-### Как поменять версию прошивки?
+### Как изменить версию прошивки
 
-Открой [`version.txt`](../version.txt) в корне репозитория, впиши новый номер
-(например `8.0.1`, без `v`), закоммить и запушь в `main`. Скрипт
-`scripts/apply_version.sh` подставит `Ryazhenka v8.0.1` в строку версии,
-показываемую на консоли, а CI выпустит релиз с тем же именем.
+Указать номер в `version.txt` (например, `8.0.1`, без `v`), закоммитить и запушить
+в `main`. Скрипт `scripts/apply_version.sh` подставит `Ryazhenka v8.0.1` в строку
+версии на консоли; CI выпустит релиз с тем же именем.
 
-### Как работает автосборка и релизы?
+### Как работает автосборка и релизы
 
-При каждом push в `main` workflow `.github/workflows/build-release.yml`:
-1. собирает прошивку в Docker‑образе `devkitpro/devkita64`;
+Workflow `.github/workflows/build-release.yml` при push в `main`:
+
+1. собирает прошивку в контейнере `devkitpro/devkita64`;
 2. применяет версию из `version.txt`;
 3. встраивает splash Ryazhenka в `package3`;
-4. публикует релиз `Ryazhenka vX.Y.Z` с архивом и пометкой, что это патченная версия.
+4. публикует релиз `Ryazhenka vX.Y.Z` с архивом артефактов и пометкой о патчах.
 
-### Что делает патч AOTag?
+### Что делает патч AOTag
 
-`exosphere` (Secure Monitor) обычно блокирует запись в часть PMC‑регистров.
-Термодатчик **aotag** (порт драйвера из L4T, используется в Horizon‑OC для оценки
-температуры памяти) требует доступа к этим регистрам. Патч добавляет таблицу
-доступа `RtcPmcAccessTable`, разрешающую нужный PMC‑доступ. Включена **только**
-PMC‑часть; разгон оперативной памяти (EMC) сюда не входит.
+Secure Monitor (`exosphere`) по умолчанию блокирует запись в часть PMC-регистров.
+Термодатчик aotag (драйвер, портированный из L4T; в Horizon-OC используется для
+оценки температуры памяти) требует доступа к этим регистрам. Патч добавляет
+таблицу доступа `RtcPmcAccessTable`, разрешающую необходимый PMC-доступ. Включена
+только PMC-часть; разгон оперативной памяти (EMC) не входит в патч.
 
-> ⚠️ Сам по себе патч лишь *разрешает* доступ. Чтобы читать температуру aotag,
-> нужен соответствующий overclock‑сисмодуль (например, из Horizon‑OC),
-> устанавливаемый отдельно на SD‑карту.
+Патч лишь разрешает доступ. Для чтения температуры aotag требуется
+соответствующий overclock-сисмодуль (например, из Horizon-OC), устанавливаемый
+отдельно на SD-карту.
 
-### Откуда взялся логотип загрузки?
+### Загрузочный логотип
 
-Splash‑экран (`img/splash.png` / `img/splash.bin`, 1280×720) заменён на логотип
-**Ryazhenka** и встраивается в `fusee/package3`. Встроенный в модуль `boot`
-логотип (`.inc`) возвращён к **оригинальному** виду Atmosphère.
+Splash (`img/splash.png`, `img/splash.bin`, 1280×720) заменён на логотип Ryazhenka
+и встраивается в `fusee/package3`. Встроенный в модуль `boot` логотип (`.inc`)
+возвращён к оригиналу Atmosphère.
 
-### Что значит «June 15th» в релизах оригинала?
+### Синхронизация с оригинальной Atmosphère
 
-Это давняя шутка SciresM из оригинальной Atmosphère: «June 15» — пропущенная
-дата первого релиза 2018 года, которую с тех пор шутливо упоминают в каждом
-релизе. К Ryazhenka отношения не имеет, но сохранена как часть наследия проекта.
+Workflow `.github/workflows/upstream-sync.yml` периодически (cron) проверяет
+upstream-репозиторий. При новых коммитах их изменения накладываются на отдельную
+ветку и открывается pull request для ручного просмотра и применения.
+Автоматический мерж не выполняется.
 
-### Как обновляться вслед за оригинальной Atmosphère?
+### Назначение «June 15th» в релизах оригинала
 
-Workflow `.github/workflows/upstream-sync.yml` периодически проверяет оригинальный
-репозиторий и при новых коммитах автоматически создаёт pull request. Ты сам
-решаешь, применять его или нет.
+Исторический мем оригинальной Atmosphère (пропущенная дата релиза 2018 года).
+К Ryazhenka не относится; упоминается только как часть наследия проекта.
