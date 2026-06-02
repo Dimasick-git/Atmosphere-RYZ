@@ -107,4 +107,12 @@ tools/*/
 
 package3
 
+# Ryazhenka: keep these tracked despite the broad rules above.
+# (.github is hidden so '.**/' would ignore it; splash.bin matches '*.bin'.)
+!.github/
+!.github/**
+!img/splash.bin
+!version.txt
+!.upstream-ref
+
 stratosphere/test/

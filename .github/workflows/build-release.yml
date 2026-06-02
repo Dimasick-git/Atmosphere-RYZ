@@ -1,0 +1,116 @@
+# Atmosphère-RYZ — automatic build & release
+#
+# EN: Builds the firmware on every push to main and publishes a release named
+#     "Ryazhenka v<version.txt>" with the patched artifacts. Also runnable manually.
+# RU: Собирает прошивку при каждом push в main и публикует релиз с именем
+#     "Ryazhenka v<version.txt>" и пропатченными артефактами. Можно запустить вручную.
+name: Build & Release
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/upstream-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install toolchain packages & python deps
+        run: |
+          set -eux
+          # Toolchains / tools needed for a full Atmosphère build.
+          dkp-pacman -Sy --noconfirm --needed \
+            switch-dev switch-glm switch-libjpeg-turbo \
+            devkitARM devkitarm-rules hactool || true
+          python3 -m pip install --no-cache-dir --break-system-packages lz4 Pillow || \
+            python3 -m pip install --no-cache-dir lz4 Pillow
+
+      - name: Read version
+        id: ver
+        run: |
+          VERSION="$(bash scripts/apply_version.sh)"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Building Ryazhenka v${VERSION}"
+
+      - name: Build
+        run: |
+          set -eux
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITA64=/opt/devkitpro/devkitA64
+          export DEVKITARM=/opt/devkitpro/devkitARM
+          make -j"$(nproc)"
+
+      - name: Inject Ryazhenka splash into package3
+        run: |
+          set -eux
+          if [ -f fusee/package3 ]; then
+            python3 utilities/insert_splash_screen.py img/splash.png fusee/package3
+          fi
+
+      - name: Package artifacts
+        id: pkg
+        run: |
+          set -eux
+          VERSION="${{ steps.ver.outputs.version }}"
+          OUT="atmosphere-ryz-${VERSION}"
+          mkdir -p "dist/${OUT}"
+          # Collect the standard Atmosphère output layout if present.
+          [ -d out ]            && cp -r out/*            "dist/${OUT}/" 2>/dev/null || true
+          [ -f fusee/fusee.bin ] && cp fusee/fusee.bin     "dist/${OUT}/" 2>/dev/null || true
+          [ -f fusee/package3 ]  && cp fusee/package3      "dist/${OUT}/" 2>/dev/null || true
+          ( cd dist && zip -r "${OUT}.zip" "${OUT}" )
+          echo "zip=dist/${OUT}.zip" >> "$GITHUB_OUTPUT"
+          ls -la dist || true
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: atmosphere-ryz-${{ steps.ver.outputs.version }}
+          path: dist/*.zip
+          if-no-files-found: warn
+
+      - name: Publish release
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: Ryazhenka v${{ steps.ver.outputs.version }}
+          make_latest: true
+          files: dist/*.zip
+          body: |
+            ## 🍶 Atmosphère-RYZ — Ryazhenka v${{ steps.ver.outputs.version }}
+
+            **🇷🇺 Это ПАТЧЕНАЯ неофициальная сборка Atmosphère.**
+            Не сообщайте о проблемах с ней командам Atmosphère / CNX / Horizon-OC.
+
+            **🇬🇧 This is a PATCHED, unofficial Atmosphère build.**
+            Do not report issues with it to the upstream Atmosphère / CNX / Horizon-OC teams.
+
+            ### Патчи / Patches
+            - 🎨 Логотип загрузки заменён на **Ryazhenka** (boot splash).
+            - 🔁 Компилируемый лого `boot` возвращён к оригиналу Atmosphère.
+            - 🌡️ Патч **AOTag** (PMC-доступ в `exosphere`, порт из Horizon-OC).
+            - 🏷️ Версия из `version.txt` → отображается на консоли как `Ryazhenka v${{ steps.ver.outputs.version }}`.
+
+            Собрано автоматически из коммита `${{ github.sha }}`.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
