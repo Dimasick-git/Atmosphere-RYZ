@@ -1,32 +1,56 @@
-# Atmosphère
-Atmosphère is a work-in-progress customized firmware for the Nintendo Switch. Its design principle consists of a multi-layered approach where each layer replaces/modifies a different component of the Nintendo Switch's system.
+# Atmosphère-RYZ (Ryazhenka)
 
-## Components
-Atmosphère provides six core components, mimicking to some degree the various layers of the Earth's atmosphere:
-+ [fusée](components/fusee.md)
-+ [exosphère](components/exosphere.md)
-+ [thermosphère](components/thermosphere.md)
-+ [mesosphère](components/mesosphere.md)
-+ [stratosphère](components/stratosphere.md)
-+ [troposphère](components/troposphere.md)
+## 🇬🇧 English (short)
 
-Additionally, Atmosphère also provides the following secondary components:
+Atmosphère-RYZ is a patched fork of Atmosphère, a custom firmware for the
+Nintendo Switch. It keeps Atmosphère's multi-layered design and adds the
+Ryazhenka boot splash, the Horizon-OC **AOTag** PMC patch, an editable
+`version.txt`, and automated build/release. The detailed per-component docs
+linked below remain in English (upstream reference).
+
+## 🇷🇺 Русский (подробно)
+
+Atmosphère‑RYZ («Ryazhenka») — кастомная прошивка для Nintendo Switch,
+основанная на [Atmosphère](https://github.com/Atmosphere-NX/Atmosphere). Как и
+оригинал, она построена по многослойному принципу: каждый слой заменяет или
+дополняет отдельный компонент системы Switch.
+
+### Компоненты
+
+Atmosphère состоит из шести основных компонентов (названных по слоям атмосферы):
++ [fusée](components/fusee.md) — загрузчик первой стадии;
++ [exosphère](components/exosphere.md) — кастомный Secure Monitor (**здесь патч AOTag**);
++ [thermosphère](components/thermosphere.md) — гипервизор / EmuNAND на EL2;
++ [mesosphère](components/mesosphere.md) — реимплементация ядра Horizon;
++ [stratosphère](components/stratosphere.md) — кастомные системные модули;
++ [troposphère](components/troposphere.md) — патчи уровня приложений.
+
+Дополнительные компоненты:
 + [emummc](components/emummc.md)
 + [libraries](components/libraries.md)
 
-## Features
-Atmosphère provides several original features which add or expand functionalities for the customized firmware environment:
-+ [Cheats](features/cheats.md)
-+ [Configurations](features/configurations.md)
+### Возможности
 
-## Building Atmosphère
-A guide to building Atmosphère can be found [here](building.md).
++ [Читы / Cheats](features/cheats.md)
++ [Конфигурации / Configurations](features/configurations.md)
++ [DNS MITM](features/dns_mitm.md)
 
-## Upcoming Features
-A list of planned features for Atmosphère can be found [here](roadmap.md).
+### Отличия Ryazhenka от оригинала
 
-## Release History
-A changelog of previous versions of Atmosphère can be found [here](changelog.md).
++ **Логотип загрузки** заменён на Ryazhenka (`img/splash.png` → `fusee/package3`).
++ **Компилируемый лого** модуля `boot` возвращён к оригиналу Atmosphère.
++ **AOTag**: патч доступа к PMC в `exosphere` (порт из Horizon‑OC) для термодатчика aotag.
++ **Версия** задаётся файлом [`version.txt`](../version.txt) (`Ryazhenka vX.Y.Z`).
++ **Автосборка и авто‑релиз** через GitHub Actions, **авто‑PR** при обновлениях оригинала.
 
-## Frequently Asked Questions
-Answers to one or more frequently asked questions may be found [here](faq.md).
+### Сборка
+
+Руководство по сборке — в [building.md](building.md).
+
+### История изменений
+
+Список изменений — в [changelog.md](changelog.md).
+
+### Планы
+
+Планируемые возможности оригинальной Atmosphère — в [roadmap.md](roadmap.md).

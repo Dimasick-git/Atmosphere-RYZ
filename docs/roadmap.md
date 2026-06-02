@@ -1,4 +1,16 @@
-# Planned Features
+# Roadmap / Планы
+
+> 🇬🇧 **EN (short):** Atmosphère-RYZ has no separate roadmap — it follows
+> upstream Atmosphère. The original upstream roadmap is preserved below for
+> reference.
+>
+> 🇷🇺 **RU:** У Atmosphère‑RYZ нет отдельного роадмапа — форк следует за
+> оригинальной Atmosphère (новые версии подтягиваются через авто‑PR). Ниже —
+> сохранённый оригинальный роадмап Atmosphère для справки.
+
+---
+
+# Planned Features (upstream Atmosphère)
 atmosphère has a number of features that are either works-in-progress or planned. Please note that while time-estimates are given, they are loose, and things may be completed sooner or later than advertised.
 
 The following descriptions were last updated on January 14th, 2021

@@ -1,4 +1,24 @@
 # Changelog
+
+> 🇬🇧 **EN (short):** Ryazhenka-specific changes are listed first; the upstream
+> Atmosphère changelog follows below.
+>
+> 🇷🇺 **RU:** Сначала идут изменения, специфичные для Ryazhenka, затем —
+> оригинальный changelog Atmosphère.
+
+## Ryazhenka v8.0.0
++ 🍶 Форк на базе Atmosphere‑CNX с **полностью убранным** брендингом CNX.
++ 🎨 Загрузочный splash заменён на логотип **Ryazhenka** (`img/splash.*`).
++ 🔁 Компилируемый лого модуля `boot` возвращён к оригиналу Atmosphère.
++ 🌡️ Добавлен патч **AOTag** в `exosphere` (PMC‑доступ, порт из Horizon‑OC).
++ 🏷️ Версия вынесена в редактируемый `version.txt` (`Ryazhenka vX.Y.Z`).
++ ⚙️ Добавлена автосборка и авто‑релиз (GitHub Actions).
++ 🔄 Добавлен авто‑PR при изменениях в оригинальной Atmosphère.
+
+---
+
+# Upstream Atmosphère changelog
+
 ## 1.11.1
 + Basic support was added for 22.1.0.
 + General system stability improvements to enhance the user's experience.
