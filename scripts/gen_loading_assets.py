@@ -10,20 +10,20 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
 
-FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 OUT  = "stratosphere/boot/source/boot_loading_assets.inc"
-SIZE = 24
+SIZE = 18
 PAD  = 2
 
-TEXT = (230, 232, 239, 255)   # clean cool white
+TEXT = (228, 231, 240, 255)   # clean cool white
 OKC  = (61, 220, 132, 255)    # soft green
 
 LINES = [
-    "Загрузка ресурсов Ryazhenka",
-    "Проверка модулей (AOTag/OC)",
-    "Загрузка KIP",
-    "Синхронизация модулей",
-    "Запуск Ryazhenka",
+    "» Загрузка ресурсов Ryazhenka",
+    "» Проверка модулей (AOTag/OC)",
+    "» Загрузка KIP",
+    "» Синхронизация модулей",
+    "» Запуск Ryazhenka",
 ]
 
 font = ImageFont.truetype(FONT, SIZE)

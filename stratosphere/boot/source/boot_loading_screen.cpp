@@ -26,16 +26,16 @@ namespace ams::boot {
         struct LoadImg  { u32 w; u32 h; const u32 *data; };
 #include "boot_loading_assets.inc"
 
-        /* Layout (landscape: x in [0,1280) horizontal, y in [0,720) vertical). */
-        constexpr size_t LineX  = 160;
-        constexpr size_t StartY = 222;
-        constexpr size_t LineH  = 56;
-        constexpr size_t OkGap  = 16;
+        /* Layout (landscape: x in [0,1280) horizontal, y in [0,720) vertical). Top-left. */
+        constexpr size_t LineX  = 44;
+        constexpr size_t StartY = 40;
+        constexpr size_t LineH  = 30;
+        constexpr size_t OkGap  = 10;
 
-        /* Timing. */
-        constexpr int CharMs     = 16;   /* per typed character */
-        constexpr int AfterLine  = 130;  /* pause once a line is typed */
-        constexpr int AfterOk    = 150;  /* pause after OK appears */
+        /* Timing (snappy). */
+        constexpr int CharMs     = 5;    /* per typed character */
+        constexpr int AfterLine  = 28;   /* pause once a line is typed */
+        constexpr int AfterOk    = 50;   /* pause after OK appears */
 
         void PlayAnimation() {
             /* Clear once to black, then only ever add content (flicker-free). */
@@ -61,7 +61,7 @@ namespace ams::boot {
                 os::SleepThread(TimeSpan::FromMilliSeconds(AfterOk));
             }
 
-            os::SleepThread(TimeSpan::FromMilliSeconds(500));
+            os::SleepThread(TimeSpan::FromMilliSeconds(300));
         }
 
     }
