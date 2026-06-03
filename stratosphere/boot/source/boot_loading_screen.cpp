@@ -32,10 +32,11 @@ namespace ams::boot {
         constexpr size_t LineH  = 30;
         constexpr size_t OkGap  = 10;
 
-        /* Timing (snappy). */
-        constexpr int CharMs     = 5;    /* per typed character */
-        constexpr int AfterLine  = 28;   /* pause once a line is typed */
-        constexpr int AfterOk    = 50;   /* pause after OK appears */
+        /* Timing (very snappy: reveal several chars per frame, ~25x faster). */
+        constexpr u32 CharStep   = 6;    /* characters revealed per frame */
+        constexpr int CharMs     = 0;    /* delay per reveal step */
+        constexpr int AfterLine  = 1;    /* pause once a line is typed */
+        constexpr int AfterOk    = 3;    /* pause after OK appears */
 
         void PlayAnimation() {
             /* Clear once to black, then only ever add content (flicker-free). */
@@ -46,12 +47,14 @@ namespace ams::boot {
                 const LoadLine &ln = LoadLines[i];
                 const size_t y = StartY + i * LineH;
 
-                /* Typewriter reveal, letter by letter. */
-                for (u32 k = 0; k < ln.nchars; k++) {
+                /* Typewriter reveal, several characters per frame. */
+                for (u32 k = 0; k < ln.nchars; k += CharStep) {
                     DrawBitmapRGBAClipped(LineX, y, ln.w, ln.h, ln.data, ln.cuts[k]);
                     PresentFrame();
                     os::SleepThread(TimeSpan::FromMilliSeconds(CharMs));
                 }
+                /* Ensure the full line is drawn (the step may skip the last char). */
+                DrawBitmapRGBAClipped(LineX, y, ln.w, ln.h, ln.data, ln.cuts[ln.nchars - 1]);
 
                 os::SleepThread(TimeSpan::FromMilliSeconds(AfterLine));
 
