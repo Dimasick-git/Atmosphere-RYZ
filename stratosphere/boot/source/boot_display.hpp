@@ -30,6 +30,7 @@ namespace ams::boot {
     void DrawPixel(size_t x, size_t y, u32 color);
     void DrawFilledRect(size_t x, size_t y, size_t width, size_t height, u32 color);
     void DrawBitmapRGBA(size_t x, size_t y, size_t width, size_t height, const u32 *data);
+    void DrawBitmapRGBAClipped(size_t x, size_t y, size_t width, size_t height, const u32 *data, size_t draw_width);
     void PresentFrame();
 
 }
