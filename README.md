@@ -39,7 +39,7 @@ Component reference documentation: [`docs/main.md`](docs/main.md).
 Atmosphère-RYZ (кодовое имя «Ryazhenka», ряженка) — пропатченный форк
 [Atmosphère](https://github.com/Atmosphere-NX/Atmosphere), кастомной прошивки для
 Nintendo Switch. Собран на базе
-[Atmosphere-CNX](https://github.com/CostelaCNX/Atmosphere-CNX); брендинг CNX полностью удалён.
+[Atmosphere-CNX](https://github.com/CostelaCNX/Atmosphere-CNX);
 
 ### Отличия от базы
 
