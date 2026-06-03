@@ -37,31 +37,6 @@ namespace ams::boot {
         constexpr int AfterLine  = 130;  /* pause once a line is typed */
         constexpr int AfterOk    = 150;  /* pause after OK appears */
 
-        /* First-boot flag on the SD card. */
-        constexpr const char *SdMount  = "sdmc";
-        constexpr const char *FlagDir  = "sdmc:/atmosphere/startup";
-        constexpr const char *FlagFile = "sdmc:/atmosphere/startup/ryazhenka_boot_shown";
-
-        bool MountSdWithRetries() {
-            for (int i = 0; i < 10; i++) {
-                if (R_SUCCEEDED(fs::MountSdCard(SdMount))) {
-                    return true;
-                }
-                os::SleepThread(TimeSpan::FromMilliSeconds(100));
-            }
-            return false;
-        }
-
-        bool FlagExists() {
-            bool has = false;
-            return R_SUCCEEDED(fs::HasFile(std::addressof(has), FlagFile)) && has;
-        }
-
-        void WriteFlag() {
-            fs::EnsureDirectory(FlagDir);
-            fs::CreateFile(FlagFile, 0);
-        }
-
         void PlayAnimation() {
             /* Clear once to black, then only ever add content (flicker-free). */
             ClearFrame();
@@ -92,21 +67,11 @@ namespace ams::boot {
     }
 
     void ShowLoadingScreen() {
-        /* Only on first boot: gated by a flag file on the SD card.
-           All FS access is best-effort (fs auto-abort is disabled in boot). */
-        if (!MountSdWithRetries()) {
-            return;
-        }
-
-        if (FlagExists()) {
-            fs::Unmount(SdMount);
-            return;
-        }
-
+        /* NOTE: The boot sysmodule runs before the FS sysmodule has finished
+           bringing up the SD card, so it must NOT touch the SD card here — doing
+           so races/locks SD init and makes ams_mitm fail its own MountSdCard and
+           abort. The screen is therefore purely on-screen, no SD access. */
         PlayAnimation();
-
-        WriteFlag();
-        fs::Unmount(SdMount);
     }
 
 }
