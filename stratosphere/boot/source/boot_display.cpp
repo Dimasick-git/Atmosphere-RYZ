@@ -521,6 +521,70 @@ namespace ams::boot {
         }
     }
 
+    /* ---- Landscape drawing primitives (origin top-left, x in [0,1280), y in [0,720)). ---- */
+
+    void ClearFrame() {
+        if (!g_is_display_intialized) {
+            return;
+        }
+        std::memset(g_frame_buffer, 0, FrameBufferSize);
+    }
+
+    void DrawPixel(size_t x, size_t y, u32 color) {
+        if (x >= FrameBufferHeight || y >= 720) {
+            return;
+        }
+        g_frame_buffer[(FrameBufferHeight - 1 - x) * FrameBufferWidth + y] = color;
+    }
+
+    void DrawFilledRect(size_t x, size_t y, size_t width, size_t height, u32 color) {
+        for (size_t j = 0; j < height; j++) {
+            for (size_t i = 0; i < width; i++) {
+                DrawPixel(x + i, y + j, color);
+            }
+        }
+    }
+
+    void DrawBitmapRGBA(size_t x, size_t y, size_t width, size_t height, const u32 *data) {
+        for (size_t j = 0; j < height; j++) {
+            for (size_t i = 0; i < width; i++) {
+                const u32 px = data[j * width + i];
+                const u32 a  = (px >> 24) & 0xFF;
+                if (a == 0) {
+                    continue;
+                }
+                const size_t sx = x + i;
+                const size_t sy = y + j;
+                if (sx >= FrameBufferHeight || sy >= 720) {
+                    continue;
+                }
+                u32 * const dst = std::addressof(g_frame_buffer[(FrameBufferHeight - 1 - sx) * FrameBufferWidth + sy]);
+                if (a == 0xFF) {
+                    *dst = px;
+                    continue;
+                }
+                const u32 d = *dst;
+                const u32 ia = 255 - a;
+                const u32 r = (((px >> 16) & 0xFF) * a + ((d >> 16) & 0xFF) * ia) / 255;
+                const u32 g = (((px >>  8) & 0xFF) * a + ((d >>  8) & 0xFF) * ia) / 255;
+                const u32 b = (((px      ) & 0xFF) * a + ((d      ) & 0xFF) * ia) / 255;
+                *dst = 0xFF000000u | (r << 16) | (g << 8) | b;
+            }
+        }
+    }
+
+    void PresentFrame() {
+        if (!g_is_display_intialized) {
+            return;
+        }
+        dd::FlushDataCache(g_frame_buffer, FrameBufferSize);
+        if (g_lcd_vendor == 0x2050) {
+            EnableBacklightForVendor2050ForAula(g_display_brightness);
+        } else {
+            EnableBacklightForGeneric(g_display_brightness);
+        }
+    }
+
     void FinalizeDisplay() {
         if (!g_is_display_intialized) {
             return;

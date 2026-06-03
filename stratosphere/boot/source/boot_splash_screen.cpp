@@ -17,6 +17,7 @@
 #include "boot_boot_reason.hpp"
 #include "boot_display.hpp"
 #include "boot_splash_screen.hpp"
+#include "boot_loading_screen.hpp"
 
 namespace ams::boot {
 
@@ -39,6 +40,9 @@ namespace ams::boot {
             /* Splash screen is shown for 2 seconds. */
             ShowDisplay(SplashScreenX, SplashScreenY, SplashScreenW, SplashScreenH, SplashScreen);
             os::SleepThread(TimeSpan::FromSeconds(2));
+
+            /* Ryazhenka: animated loading screen after the splash. */
+            ShowLoadingScreen();
         }
         FinalizeDisplay();
     }

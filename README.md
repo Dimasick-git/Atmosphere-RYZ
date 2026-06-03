@@ -20,6 +20,7 @@ built on top of Atmosphere-CNX. Differences from the base:
 
 - Boot splash replaced with the Ryazhenka logo (`img/splash.png`, injected into `fusee/package3`).
 - Compiled boot logo (in the `boot` module) is also the Ryazhenka logo.
+- Animated boot loading screen after the splash (progress bar + checklist; cosmetic).
 - AOTag PMC access patch in `exosphere`, ported from
   [Horizon-OC](https://github.com/Horizon-OC/Horizon-OC). PMC access only; no RAM/EMC overclock.
 - Version is defined in a single file, `version.txt`. It is shown on-console as
@@ -47,6 +48,7 @@ Nintendo Switch. Собран на базе
 |---------|-----------|
 | Загрузочный splash | Заменён на логотип Ryazhenka (`img/splash.png`, `img/splash.bin`); встраивается в `fusee/package3` скриптом `utilities/insert_splash_screen.py`. |
 | Компилируемый лого | Встроенный в модуль `boot` логотип (`boot_splash_screen_notext.inc`) тоже заменён на полноэкранный логотип Ryazhenka. |
+| Экран загрузки | После заставки модуль `boot` показывает анимированный экран «СИСТЕМА ЗАГРУЖАЕТСЯ..» (прогресс-бар + чеклист). Косметический, по таймеру. |
 | Патч AOTag | В `exosphere` добавлена таблица доступа `RtcPmcAccessTable` (порт из Horizon-OC), открывающая PMC-регистры для термодатчика aotag. Только PMC; разгон RAM (EMC) не включён. |
 | Версия | Задаётся файлом `version.txt`. Подставляется в строку версии на консоли (`Ryazhenka vX.Y.Z`) и используется как имя релиза. |
 | CI: сборка | При каждом push в `main` GitHub Actions собирает прошивку и публикует релиз с пометкой о патчах. |

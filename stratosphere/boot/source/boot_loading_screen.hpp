@@ -18,18 +18,8 @@
 
 namespace ams::boot {
 
-    /* Splash Screen/Display utilities. */
-    void InitializeDisplay();
-    void ShowDisplay(size_t x, size_t y, size_t width, size_t height, const u32 *img);
-    void FinalizeDisplay();
-
-    void SetDisplayBrightness(int percentage);
-
-    /* Landscape (1280x720, origin top-left) drawing primitives for the loading screen. */
-    void ClearFrame();
-    void DrawPixel(size_t x, size_t y, u32 color);
-    void DrawFilledRect(size_t x, size_t y, size_t width, size_t height, u32 color);
-    void DrawBitmapRGBA(size_t x, size_t y, size_t width, size_t height, const u32 *data);
-    void PresentFrame();
+    /* Ryazhenka: cosmetic animated "loading" screen, shown after the splash.
+       The display must already be initialized by the caller. */
+    void ShowLoadingScreen();
 
 }
