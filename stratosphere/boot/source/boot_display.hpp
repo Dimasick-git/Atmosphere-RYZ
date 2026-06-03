@@ -32,5 +32,6 @@ namespace ams::boot {
     void DrawBitmapRGBA(size_t x, size_t y, size_t width, size_t height, const u32 *data);
     void DrawBitmapRGBAClipped(size_t x, size_t y, size_t width, size_t height, const u32 *data, size_t draw_width);
     void PresentFrame();
+    void FlushFrame();
 
 }

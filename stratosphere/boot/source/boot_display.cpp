@@ -614,6 +614,15 @@ namespace ams::boot {
         }
     }
 
+    void FlushFrame() {
+        if (!g_is_display_intialized) {
+            return;
+        }
+        /* Push CPU writes to memory so the display picks them up. No backlight work
+           (it is already enabled), so incremental updates stay cheap and fast. */
+        dd::FlushDataCache(g_frame_buffer, FrameBufferSize);
+    }
+
     void FinalizeDisplay() {
         if (!g_is_display_intialized) {
             return;

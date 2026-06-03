@@ -32,14 +32,14 @@ namespace ams::boot {
         constexpr size_t LineH  = 30;
         constexpr size_t OkGap  = 10;
 
-        /* Timing (very snappy: reveal several chars per frame, ~25x faster). */
-        constexpr u32 CharStep   = 6;    /* characters revealed per frame */
-        constexpr int CharMs     = 0;    /* delay per reveal step */
-        constexpr int AfterLine  = 1;    /* pause once a line is typed */
-        constexpr int AfterOk    = 3;    /* pause after OK appears */
+        /* Timing: one character per frame, fast like a quick typist. */
+        constexpr int CharMs     = 1;    /* delay per character */
+        constexpr int AfterLine  = 12;   /* pause once a line is typed */
+        constexpr int AfterOk    = 22;   /* pause after OK appears */
 
         void PlayAnimation() {
-            /* Clear once to black, then only ever add content (flicker-free). */
+            /* Clear once to black and enable the backlight a single time. After that
+               every update is a cheap cache flush (FlushFrame) -> no flicker, fast. */
             ClearFrame();
             PresentFrame();
 
@@ -47,20 +47,18 @@ namespace ams::boot {
                 const LoadLine &ln = LoadLines[i];
                 const size_t y = StartY + i * LineH;
 
-                /* Typewriter reveal, several characters per frame. */
-                for (u32 k = 0; k < ln.nchars; k += CharStep) {
+                /* Typewriter reveal, one character at a time. */
+                for (u32 k = 0; k < ln.nchars; k++) {
                     DrawBitmapRGBAClipped(LineX, y, ln.w, ln.h, ln.data, ln.cuts[k]);
-                    PresentFrame();
+                    FlushFrame();
                     os::SleepThread(TimeSpan::FromMilliSeconds(CharMs));
                 }
-                /* Ensure the full line is drawn (the step may skip the last char). */
-                DrawBitmapRGBAClipped(LineX, y, ln.w, ln.h, ln.data, ln.cuts[ln.nchars - 1]);
 
                 os::SleepThread(TimeSpan::FromMilliSeconds(AfterLine));
 
                 /* Show the OK once the line finished "loading". */
                 DrawBitmapRGBA(LineX + ln.w + OkGap, y, LoadOk.w, LoadOk.h, LoadOk.data);
-                PresentFrame();
+                FlushFrame();
                 os::SleepThread(TimeSpan::FromMilliSeconds(AfterOk));
             }
 
