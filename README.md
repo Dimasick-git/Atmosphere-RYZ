@@ -8,8 +8,7 @@
 ![Base](https://img.shields.io/badge/base-Atmosph%C3%A8re-7c3aed.svg)
 ![Patched](https://img.shields.io/badge/patched-AOTag%20%7C%20Ryazhenka-ff2d55.svg)
 
-Patched fork of Atmosphère (Nintendo Switch custom firmware). Base:
-[Atmosphere-CNX](https://github.com/CostelaCNX/Atmosphere-CNX); CNX branding removed.
+Patched fork of Atmosphère (Nintendo Switch custom firmware).
 
 ---
 
