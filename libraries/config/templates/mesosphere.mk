@@ -13,7 +13,7 @@ ATMOSPHERE_OPTIMIZATION_FLAG := -O3
 endif
 
 export DEFINES     := $(ATMOSPHERE_DEFINES) -DATMOSPHERE_IS_MESOSPHERE
-export SETTINGS    := $(ATMOSPHERE_SETTINGS) $(ATMOSPHERE_OPTIMIZATION_FLAG) -mgeneral-regs-only -ffixed-x18 -Wextra -Werror -fno-non-call-exceptions
+export SETTINGS    := $(ATMOSPHERE_SETTINGS) $(ATMOSPHERE_OPTIMIZATION_FLAG) -mgeneral-regs-only -ffixed-x18 -Wextra -Werror -Wno-error=unused-but-set-variable -fno-non-call-exceptions
 export CFLAGS      := $(ATMOSPHERE_CFLAGS) $(SETTINGS) $(DEFINES) $(INCLUDE)
 export CXXFLAGS    := $(CFLAGS) $(ATMOSPHERE_CXXFLAGS) -fno-use-cxa-atexit
 export ASFLAGS     := $(ATMOSPHERE_ASFLAGS) $(SETTINGS) $(DEFINES) $(INCLUDE)

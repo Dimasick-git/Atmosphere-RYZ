@@ -14,7 +14,7 @@ ATMOSPHERE_OPTIMIZATION_FLAG := -Os
 endif
 
 DEFINES     := $(ATMOSPHERE_DEFINES) -DATMOSPHERE_IS_EXOSPHERE -DAMS_FORCE_DISABLE_DETAILED_ASSERTIONS
-SETTINGS    := $(ATMOSPHERE_SETTINGS) -mgeneral-regs-only -ffixed-x18 $(ATMOSPHERE_OPTIMIZATION_FLAG) -Wextra -Werror -fno-non-call-exceptions \
+SETTINGS    := $(ATMOSPHERE_SETTINGS) -mgeneral-regs-only -ffixed-x18 $(ATMOSPHERE_OPTIMIZATION_FLAG) -Wextra -Werror -Wno-error=unused-but-set-variable -fno-non-call-exceptions \
                -Wno-array-bounds \
                -Wno-stringop-overflow \
                -Wno-stringop-overread
@@ -29,7 +29,7 @@ ATMOSPHERE_OPTIMIZATION_FLAG := -O2
 endif
 
 DEFINES     := $(ATMOSPHERE_DEFINES) -DATMOSPHERE_IS_EXOSPHERE -DAMS_FORCE_DISABLE_DETAILED_ASSERTIONS
-SETTINGS    := $(ATMOSPHERE_SETTINGS) $(ATMOSPHERE_OPTIMIZATION_FLAG) -Werror -fno-non-call-exceptions \
+SETTINGS    := $(ATMOSPHERE_SETTINGS) $(ATMOSPHERE_OPTIMIZATION_FLAG) -Werror -Wno-error=unused-but-set-variable -fno-non-call-exceptions \
                -Wno-array-bounds \
                -Wno-stringop-overflow \
                -Wno-stringop-overread
