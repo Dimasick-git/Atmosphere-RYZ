@@ -63,7 +63,7 @@ jobs:
           SHORT="$(echo "${NEW}" | cut -c1-12)"
           BRANCH="upstream-sync/${SHORT}"
           echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
-          git checkout -B "${BRANCH}"
+          # branch/commit делает peter-evans/create-pull-request ниже
           # Apply only what changed upstream since the last sync (3-way; leaves .rej on conflict).
           git diff "${LAST}..${NEW}" | git apply --3way --whitespace=nowarn || true
           echo "${NEW}" > .upstream-ref
@@ -71,8 +71,7 @@ jobs:
           git log --oneline --no-merges "${LAST}..${NEW}" upstream/master > /tmp/upstream_commits.txt || true
           REJECTS="$(find . -name '*.rej' | sort || true)"
           { echo "rejects<<EOF"; echo "${REJECTS:-(none)}"; echo "EOF"; } >> "$GITHUB_OUTPUT"
-          git add -A
-          git commit -m "Sync upstream Atmosphère (${LAST:0:12}..${SHORT})" || echo "nothing to commit"
+          # не коммитим тут — peter-evans/create-pull-request сам закоммитит и запушит
 
       - name: Create pull request
         if: steps.detect.outputs.changed == 'true'
@@ -80,6 +79,7 @@ jobs:
         with:
           branch: ${{ steps.apply.outputs.branch }}
           base: main
+          commit-message: "Sync upstream Atmosphère (${{ steps.detect.outputs.new }})"
           title: "🔄 Upstream Atmosphère sync (${{ steps.detect.outputs.new }})"
           body: |
             ## 🔄 Автоматическая синхронизация с оригинальной Atmosphère
