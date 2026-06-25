@@ -6,4 +6,4 @@
 #     показываемую на консоли ("Ryazhenka vX.Y.Z"), и имя релиза на GitHub.
 #
 # Use a plain version like 8.0.0 (no leading "v"). Lines starting with # are ignored.
-8.0.1
+8.0.0

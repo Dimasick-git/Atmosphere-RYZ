@@ -185,10 +185,7 @@ namespace ams::svc::codegen::impl {
                 /* Process all arguments, in order. */
                 size_t i = 0;
                 (layout.ProcessArgument<AbiType, ArgumentTypes>(i++, NGRN, NSAA), ...);
-                
-                /* TODO: Unused variable. */
-                AMS_UNUSED(i);
-                
+
                 return layout;
             }
 
