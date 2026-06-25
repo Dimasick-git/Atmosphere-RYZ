@@ -67,6 +67,9 @@ jobs:
           # Apply only what changed upstream since the last sync (3-way; leaves .rej on conflict).
           git diff "${LAST}..${NEW}" | git apply --3way --whitespace=nowarn || true
           echo "${NEW}" > .upstream-ref
+          # 3-way apply оставляет конфликтные хунки маркерами и unmerged-записи в индексе.
+          # Разрешаем индекс, иначе peter-evans падает: "you need to resolve your current index first".
+          git add -A
           # Collect the list of new upstream commits for the PR body.
           git log --oneline --no-merges "${LAST}..${NEW}" upstream/master > /tmp/upstream_commits.txt || true
           REJECTS="$(find . -name '*.rej' | sort || true)"
