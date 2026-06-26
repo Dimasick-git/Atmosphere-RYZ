@@ -1,4 +1,5 @@
 # Changelog
+<<<<<<< ours
 
 EN (summary): Ryazhenka-specific changes are listed first; the upstream Atmosphère
 changelog follows below.
@@ -20,6 +21,12 @@ Atmosphère.
 
 # Upstream Atmosphère changelog
 
+=======
+## 1.11.2
++ Basic support was added for 22.5.0.
++ Atmosphère was updated to use GCC 16/newlib (latest devkitA64/devkitARM releases).
++ General system stability improvements to enhance the user's experience.
+>>>>>>> theirs
 ## 1.11.1
 + Basic support was added for 22.1.0.
 + General system stability improvements to enhance the user's experience.
