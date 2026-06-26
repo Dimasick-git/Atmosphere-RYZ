@@ -194,12 +194,8 @@ namespace ams {
         TargetFirmware_21_1_0  = ATMOSPHERE_TARGET_FIRMWARE_21_1_0,
         TargetFirmware_21_2_0  = ATMOSPHERE_TARGET_FIRMWARE_21_2_0,
         TargetFirmware_22_0_0  = ATMOSPHERE_TARGET_FIRMWARE_22_0_0,
-<<<<<<< ours
-		TargetFirmware_22_1_0  = ATMOSPHERE_TARGET_FIRMWARE_22_1_0,
-=======
         TargetFirmware_22_1_0  = ATMOSPHERE_TARGET_FIRMWARE_22_1_0,
         TargetFirmware_22_5_0  = ATMOSPHERE_TARGET_FIRMWARE_22_5_0,
->>>>>>> theirs
 
         TargetFirmware_Current = ATMOSPHERE_TARGET_FIRMWARE_CURRENT,
 
