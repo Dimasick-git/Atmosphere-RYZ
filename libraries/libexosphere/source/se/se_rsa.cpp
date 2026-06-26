@@ -99,6 +99,18 @@ namespace ams::se {
 
         /* Set non per-key flags. */
         if ((flags & ~KeySlotLockFlags_PerKey) != 0) {
+<<<<<<< ours
+=======
+            /* Pack the flags into the expected format. */
+            u32 value = 0;
+            value |= ((flags & KeySlotLockFlags_KeyRead) == 0) ? (1u << 0) : 0;
+            value |= ((flags & KeySlotLockFlags_KeyRead) == 0) ? (1u << 1) : 0;
+            value |= ((flags & KeySlotLockFlags_KeyRead) == 0) ? (1u << 2) : 0;
+            
+            /* TODO: Unused variable. */
+            AMS_UNUSED(value);
+            
+>>>>>>> theirs
             reg::Write(SE->SE_RSA_KEYTABLE_ACCESS[slot], SE_REG_BITS_ENUM_SEL(RSA_KEYTABLE_ACCESS_KEYREAD,   (flags & KeySlotLockFlags_KeyRead)  != 0, DISABLE, ENABLE),
                                                          SE_REG_BITS_ENUM_SEL(RSA_KEYTABLE_ACCESS_KEYUPDATE, (flags & KeySlotLockFlags_KeyWrite) != 0, DISABLE, ENABLE),
                                                          SE_REG_BITS_ENUM_SEL(RSA_KEYTABLE_ACCESS_KEYUSE,    (flags & KeySlotLockFlags_KeyUse)   != 0, DISABLE, ENABLE));
