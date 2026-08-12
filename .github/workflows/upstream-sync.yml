@@ -24,14 +24,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Configure git
         run: |
-          git config user.name  "ryazhenka-bot"
-          git config user.email "actions@users.noreply.github.com"
+          git config user.name  "Dimasick-git"
+          git config user.email "dimaorynchukk@gmail.com"
 
       - name: Fetch upstream Atmosphère
         run: |
@@ -78,7 +78,7 @@ jobs:
 
       - name: Create pull request
         if: steps.detect.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: ${{ steps.apply.outputs.branch }}
           base: main
