@@ -43,7 +43,7 @@ CFLAGS	:= \
 		-mgeneral-regs-only \
 		-fomit-frame-pointer \
 		-std=gnu11 \
-		-Werror -Wno-error=unused-but-set-variable \
+		-Werror \
 		-Wall \
 		-Wno-main \
 		$(ARCH) $(DEFINES)

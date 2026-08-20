@@ -29,7 +29,7 @@ endif
 endif
 
 DEFINES     := $(ATMOSPHERE_DEFINES) -DATMOSPHERE_IS_EXOSPHERE -DAMS_FORCE_DISABLE_DETAILED_ASSERTIONS
-SETTINGS    := $(ATMOSPHERE_SETTINGS) $(ATMOSPHERE_OPTIMIZATION_FLAG) -Wextra -Werror -Wno-error=unused-but-set-variable -fno-non-call-exceptions -Wno-array-bounds -Wno-stringop-overflow -Wno-stringop-overread
+SETTINGS    := $(ATMOSPHERE_SETTINGS) $(ATMOSPHERE_OPTIMIZATION_FLAG) -Wextra -Werror -fno-non-call-exceptions -Wno-array-bounds -Wno-stringop-overflow -Wno-stringop-overread
 
 ifeq ($(strip $(ATMOSPHERE_ARCH_NAME)),arm64)
 SETTINGS    += -mgeneral-regs-only -ffixed-x18
