@@ -1,0 +1,82 @@
+# Isolated Atmosphere-CNX validation build for Ryazhenka.
+# This workflow never creates, edits or deletes GitHub releases.
+name: CNX Ryazhenka Test Build
+
+on:
+  push:
+    branches: [ cnx-ryazhenka-test ]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or commit to build'
+        required: false
+        default: 'cnx-ryazhenka-test'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cnx-ryazhenka-test-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - name: Checkout test source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.ref || 'cnx-ryazhenka-test' }}
+
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Install toolchain packages and Python dependencies
+        run: |
+          set -eux
+          dkp-pacman -Sy --noconfirm --needed \
+            switch-dev switch-glm switch-libjpeg-turbo \
+            devkitARM devkitarm-rules hactool || true
+          (apt-get update && apt-get install -y --no-install-recommends python3-pip zip unzip) \
+            || python3 -m ensurepip --upgrade \
+            || dkp-pacman -S --noconfirm python-pip || true
+          python3 -m pip install --no-cache-dir --break-system-packages lz4 Pillow \
+            || python3 -m pip install --no-cache-dir lz4 Pillow
+          python3 -c "import lz4, PIL; print('python deps OK')"
+
+      - name: Apply Ryazhenka display version
+        id: ver
+        run: |
+          VERSION="$(bash scripts/apply_version.sh)"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Building isolated CNX test: Ryazhenka v${VERSION}"
+
+      - name: Build Atmosphere-CNX test package
+        run: |
+          set -eux
+          export DEVKITPRO=/opt/devkitpro
+          export DEVKITA64=/opt/devkitpro/devkitA64
+          export DEVKITARM=/opt/devkitpro/devkitARM
+          make -j"$(nproc)"
+
+      - name: Assemble test archive
+        run: |
+          set -eux
+          REL_ZIP="$(ls out/*/release/atmosphere-*.zip 2>/dev/null | grep -v debug | head -n1)"
+          FUSEE="$(ls out/*/release/fusee.bin 2>/dev/null | head -n1)"
+          test -n "${REL_ZIP}" && test -f "${FUSEE}"
+          rm -rf stage atmosphere-cnx-ryazhenka-test.zip
+          mkdir -p stage
+          unzip -q "${REL_ZIP}" -d stage
+          cp "${FUSEE}" stage/fusee.bin
+          ( cd stage && zip -r -q ../atmosphere-cnx-ryazhenka-test.zip fusee.bin atmosphere switch )
+          unzip -l atmosphere-cnx-ryazhenka-test.zip | sed -n '1,40p'
+
+      - name: Upload test artifact only
+        uses: actions/upload-artifact@v7
+        with:
+          name: atmosphere-cnx-ryazhenka-test-v${{ steps.ver.outputs.version }}
+          path: atmosphere-cnx-ryazhenka-test.zip
+          if-no-files-found: error
