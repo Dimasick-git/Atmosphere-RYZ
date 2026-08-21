@@ -1,10 +1,8 @@
-# Isolated Atmosphere-CNX validation build for Ryazhenka.
+# Isolated build of the source-only CNX Ryazhenka test branch.
 # This workflow never creates, edits or deletes GitHub releases.
 name: CNX Ryazhenka Test Build
 
 on:
-  push:
-    branches: [ cnx-ryazhenka-test ]
   workflow_dispatch:
     inputs:
       ref:
@@ -17,49 +15,60 @@ permissions:
 
 concurrency:
   group: cnx-ryazhenka-test-build
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     container:
       image: devkitpro/devkita64:latest
+
     steps:
-      - name: Checkout test source
+      - name: Checkout exact CNX Ryazhenka source
         uses: actions/checkout@v7
         with:
           ref: ${{ github.event.inputs.ref || 'cnx-ryazhenka-test' }}
+          fetch-depth: 1
 
       - name: Mark workspace safe for git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Install toolchain packages and Python dependencies
+      - name: Install toolchain and Python dependencies
         run: |
           set -eux
           dkp-pacman -Sy --noconfirm --needed \
             switch-dev switch-glm switch-libjpeg-turbo \
             devkitARM devkitarm-rules hactool || true
-          (apt-get update && apt-get install -y --no-install-recommends python3-pip zip unzip) \
+          (apt-get update && apt-get install -y --no-install-recommends git python3-pip zip unzip) \
             || python3 -m ensurepip --upgrade \
             || dkp-pacman -S --noconfirm python-pip || true
           python3 -m pip install --no-cache-dir --break-system-packages lz4 Pillow \
             || python3 -m pip install --no-cache-dir lz4 Pillow
-          python3 -c "import lz4, PIL; print('python deps OK')"
+          python3 -c "import lz4, PIL; print('python dependencies OK')"
 
-      - name: Apply Ryazhenka display version
-        id: ver
+      - name: Prepare temporary standard build inputs
         run: |
-          VERSION="$(bash scripts/apply_version.sh)"
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Building isolated CNX test: Ryazhenka v${VERSION}"
+          set -eux
+          git clone --depth 1 --branch 1.11.2 https://github.com/Atmosphere-NX/Atmosphere.git /tmp/atmosphere-1.11.2
+          mkdir -p fusee/program/mtc_tables fusee/program/sdram_params
+          cp -a /tmp/atmosphere-1.11.2/fusee/program/mtc_tables/bin fusee/program/mtc_tables/
+          cp -a /tmp/atmosphere-1.11.2/fusee/program/sdram_params/lz fusee/program/sdram_params/
+          test -f fusee/program/tsec_keygen/tsec_keygen.bin
+          sed -i 's/xrange(/range(/g' fusee/program/update_mtc_tables.py
+          ( cd fusee/program && python3 update_mtc_tables.py )
+          test -f fusee/program/mtc_tables/combined/T210SdevEmcDvfsTableS6gb01/table.bin
+          test -f fusee/program/sdram_params/lz/sdram_params_erista_0_1.lz4
+          echo 'Temporary build inputs are ready; the checked-out source branch remains unchanged.'
 
-      - name: Build Atmosphere-CNX test package
+      - name: Build full CNX Ryazhenka package
         run: |
           set -eux
           export DEVKITPRO=/opt/devkitpro
           export DEVKITA64=/opt/devkitpro/devkitA64
           export DEVKITARM=/opt/devkitpro/devkitARM
-          make -j"$(nproc)"
+          # A serial build preserves the exact CNX Haze source and avoids a parallel shader-generation race.
+          make -j1
 
       - name: Assemble test archive
         run: |
@@ -67,16 +76,16 @@ jobs:
           REL_ZIP="$(ls out/*/release/atmosphere-*.zip 2>/dev/null | grep -v debug | head -n1)"
           FUSEE="$(ls out/*/release/fusee.bin 2>/dev/null | head -n1)"
           test -n "${REL_ZIP}" && test -f "${FUSEE}"
-          rm -rf stage atmosphere-cnx-ryazhenka-test.zip
+          rm -rf stage Ryazhenka-v8.0.0-ATMOSPHERE-CNX-PERSONAL-TEST.zip
           mkdir -p stage
           unzip -q "${REL_ZIP}" -d stage
           cp "${FUSEE}" stage/fusee.bin
-          ( cd stage && zip -r -q ../atmosphere-cnx-ryazhenka-test.zip fusee.bin atmosphere switch )
-          unzip -l atmosphere-cnx-ryazhenka-test.zip | sed -n '1,40p'
+          ( cd stage && zip -r -q ../Ryazhenka-v8.0.0-ATMOSPHERE-CNX-PERSONAL-TEST.zip fusee.bin atmosphere switch )
+          unzip -l Ryazhenka-v8.0.0-ATMOSPHERE-CNX-PERSONAL-TEST.zip | sed -n '1,120p'
 
       - name: Upload test artifact only
         uses: actions/upload-artifact@v7
         with:
-          name: atmosphere-cnx-ryazhenka-test-v${{ steps.ver.outputs.version }}
-          path: atmosphere-cnx-ryazhenka-test.zip
+          name: Ryazhenka-v8.0.0-ATMOSPHERE-CNX-PERSONAL-TEST
+          path: Ryazhenka-v8.0.0-ATMOSPHERE-CNX-PERSONAL-TEST.zip
           if-no-files-found: error
