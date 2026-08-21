@@ -26,9 +26,10 @@ jobs:
       - name: Verify generated package
         run: |
           set -euo pipefail
-          test -f out/nx/release/fusee.bin
-          test -f out/nx/release/atmosphere/package3
-          zip_file="$(find out/nx/release -maxdepth 1 -type f -name 'atmosphere-*.zip' -print -quit)"
+          release_dir="out/nintendo_nx_arm64_armv8a/release"
+          test -f "$release_dir/fusee.bin"
+          test -f "$release_dir/atmosphere/package3"
+          zip_file="$(find "$release_dir" -maxdepth 1 -type f -name 'atmosphere-*.zip' -print -quit)"
           test -n "$zip_file"
           unzip -tq "$zip_file"
           sha256sum "$zip_file"
@@ -37,6 +38,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Atmosphere-CNX-clean-${{ github.sha }}
-          path: out/nx/release/atmosphere-*.zip
+          path: out/nintendo_nx_arm64_armv8a/release/atmosphere-*.zip
           if-no-files-found: error
           retention-days: 14
