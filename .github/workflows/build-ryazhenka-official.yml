@@ -1,4 +1,4 @@
-name: Build Clean Atmosphere-CNX
+name: Build Ryazhenka Official Atmosphere
 
 on:
   workflow_dispatch:
@@ -7,11 +7,11 @@ permissions:
   contents: read
 
 jobs:
-  build-clean-cnx:
-    name: Build clean CNX source
+  build:
+    name: Build official Atmosphere with Ryazhenka branding
     runs-on: ubuntu-latest
     steps:
-      - name: Check out clean source
+      - name: Check out source
         uses: actions/checkout@v4
 
       - name: Build with devkitPro
@@ -23,7 +23,7 @@ jobs:
             devkitpro/devkita64:latest \
             bash -lc 'git config --global --add safe.directory /workspace && make -j"$(nproc)"'
 
-      - name: Verify generated package
+      - name: Verify branded release package
         run: |
           set -euo pipefail
           release_dir="out/nintendo_nx_arm64_armv8a/release"
@@ -33,12 +33,14 @@ jobs:
           unzip -tq "$zip_file"
           unzip -Z1 "$zip_file" | grep -Fx 'atmosphere/package3'
           unzip -Z1 "$zip_file" | grep -Fx 'atmosphere/reboot_payload.bin'
-          sha256sum "$zip_file"
+          mkdir -p dist
+          cp "$zip_file" dist/ryazhenka-atmosphere-official.zip
+          sha256sum dist/ryazhenka-atmosphere-official.zip
 
-      - name: Upload clean CNX package
+      - name: Upload release-only test package
         uses: actions/upload-artifact@v4
         with:
-          name: Atmosphere-CNX-clean-${{ github.sha }}
-          path: out/nintendo_nx_arm64_armv8a/release/atmosphere-*.zip
+          name: Ryazhenka-Atmosphere-Official-${{ github.sha }}
+          path: dist/ryazhenka-atmosphere-official.zip
           if-no-files-found: error
           retention-days: 14
