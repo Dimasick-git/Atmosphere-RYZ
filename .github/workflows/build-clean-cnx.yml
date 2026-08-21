@@ -28,10 +28,11 @@ jobs:
           set -euo pipefail
           release_dir="out/nintendo_nx_arm64_armv8a/release"
           test -f "$release_dir/fusee.bin"
-          test -f "$release_dir/atmosphere/package3"
-          zip_file="$(find "$release_dir" -maxdepth 1 -type f -name 'atmosphere-*.zip' -print -quit)"
+          zip_file="$(find "$release_dir" -maxdepth 1 -type f -name 'atmosphere-*.zip' ! -name '*-debug.zip' -print -quit)"
           test -n "$zip_file"
           unzip -tq "$zip_file"
+          unzip -Z1 "$zip_file" | grep -Fx 'atmosphere/package3'
+          unzip -Z1 "$zip_file" | grep -Fx 'atmosphere/reboot_payload.bin'
           sha256sum "$zip_file"
 
       - name: Upload clean CNX package
