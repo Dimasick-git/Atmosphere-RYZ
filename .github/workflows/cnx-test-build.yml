@@ -55,7 +55,14 @@ jobs:
           cp -a /tmp/atmosphere-1.11.2/fusee/program/mtc_tables/bin fusee/program/mtc_tables/
           cp -a /tmp/atmosphere-1.11.2/fusee/program/sdram_params/lz fusee/program/sdram_params/
           test -f fusee/program/tsec_keygen/tsec_keygen.bin
-          sed -i 's/xrange(/range(/g' fusee/program/update_mtc_tables.py
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('fusee/program/update_mtc_tables.py')
+          text = path.read_text()
+          text = text.replace('xrange(', 'range(')
+          text = text.replace("assert os.listdir('mtc_tables/bin/%s' % board) == ['%d.bin' % i for i in range(count)]", "assert sorted(os.listdir('mtc_tables/bin/%s' % board)) == ['%d.bin' % i for i in range(count)]")
+          path.write_text(text)
+          PY
           ( cd fusee/program && python3 update_mtc_tables.py )
           test -f fusee/program/mtc_tables/combined/T210SdevEmcDvfsTableS6gb01/table.bin
           test -f fusee/program/sdram_params/lz/sdram_params_erista_0_1.lz4
