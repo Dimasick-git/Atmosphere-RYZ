@@ -63,7 +63,7 @@ namespace ams::mitm::settings {
                 const char emummc_char = emummc::IsActive() ? 'E' : 'S';
                 char display_version[sizeof(g_ams_firmware_version.display_version)];
 
-                util::SNPrintf(display_version, sizeof(display_version), "%s/RYZ v8.0.0/%c", g_ams_firmware_version.display_version, emummc_char);
+                util::SNPrintf(display_version, sizeof(display_version), "%s|RYZ v8.0.0|%c", g_ams_firmware_version.display_version, emummc_char);
 
                 std::memcpy(g_ams_firmware_version.display_version, display_version, sizeof(display_version));
             }
