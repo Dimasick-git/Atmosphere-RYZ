@@ -21,7 +21,7 @@ jobs:
             -w /workspace \
             -e HOME=/tmp \
             devkitpro/devkita64:latest \
-            bash -lc 'git config --global --add safe.directory /workspace && make -j"$(nproc)"'
+            bash -lc 'set -euo pipefail; dkp-pacman -Syu --noconfirm && git config --global --add safe.directory /workspace && make -j"$(nproc)"'
 
       - name: Verify branded release package
         run: |
