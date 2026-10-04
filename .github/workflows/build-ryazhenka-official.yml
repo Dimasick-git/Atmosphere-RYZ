@@ -20,7 +20,15 @@ jobs:
             -v "$GITHUB_WORKSPACE:/workspace" \
             -w /workspace \
             devkitpro/devkita64:latest \
-            bash -lc 'set -euo pipefail; git config --global --add safe.directory /workspace && make -j"$(nproc)"'
+            bash -lc '
+              set -euo pipefail
+              git config --global --add safe.directory /workspace
+              git clone https://github.com/switchbrew/libnx.git /tmp/ryazhenka-libnx
+              git -C /tmp/ryazhenka-libnx checkout --detach feebd026ca0f5dcc2119f46ad8e0d16ad3dd4973
+              make -C /tmp/ryazhenka-libnx -j"$(nproc)"
+              make -C /tmp/ryazhenka-libnx install
+              make -j"$(nproc)"
+            '
 
       - name: Verify branded release package
         run: |
