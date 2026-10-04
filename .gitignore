@@ -66,6 +66,7 @@ Mkfile.old
 dkms.conf
 
 # Distribution files
+dist/
 *.tgz
 *.zip
 *.bz2

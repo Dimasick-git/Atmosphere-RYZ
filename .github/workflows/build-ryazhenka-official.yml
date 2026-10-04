@@ -33,14 +33,17 @@ jobs:
           unzip -tq "$zip_file"
           unzip -Z1 "$zip_file" | grep -Fx 'atmosphere/package3'
           unzip -Z1 "$zip_file" | grep -Fx 'atmosphere/reboot_payload.bin'
+          python3 utilities/verify_ryazhenka_release.py "$zip_file"
           mkdir -p dist
-          cp "$zip_file" dist/ryazhenka-atmosphere-official.zip
-          sha256sum dist/ryazhenka-atmosphere-official.zip
+          ryazhenka_version="$(awk '/^#define RYAZHENKA_RELEASE_VERSION_STRING / { gsub(/"/, "", $3); print $3 }' libraries/libvapours/include/vapours/ams/ams_api_version.h)"
+          test -n "$ryazhenka_version"
+          cp "$zip_file" "dist/ryazhenka-${ryazhenka_version}-atmosphere.zip"
+          sha256sum "dist/ryazhenka-${ryazhenka_version}-atmosphere.zip"
 
       - name: Upload release-only test package
         uses: actions/upload-artifact@v4
         with:
           name: Ryazhenka-Atmosphere-Official-${{ github.sha }}
-          path: dist/ryazhenka-atmosphere-official.zip
+          path: dist/ryazhenka-*-atmosphere.zip
           if-no-files-found: error
           retention-days: 14

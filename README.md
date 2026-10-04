@@ -1,4 +1,25 @@
 
+# Ryazhenka 8.1.0
+
+Ryazhenka 8.1.0 is based on Atmosphère 1.12.0, with upstream updates through
+`c8b7316581a8081e5b9f7d767c27db5c0a4db906`, including support for Horizon OS 23.0.0.
+The custom splash screen and `HOS|RYZ v8.1.0|E` / `HOS|RYZ v8.1.0|S`
+version display are preserved. The internal Atmosphère version stays at 1.12.0.
+
+The Ryazhenka display version is defined in
+`libraries/libvapours/include/vapours/ams/ams_api_version.h`.
+Build instructions are in [docs/building.md](docs/building.md).
+Release changes and installation instructions (Russian) are in
+[the Ryazhenka 8.1.0 release notes](docs/ryazhenka-8.1.0-release.md).
+
+Legacy libnx homebrew (including older Chiaki and PPSSPP builds) keeps its TLS
+slots at `0x108`, following the compatibility approach in Atmosphere-CNX.
+The scheduler omits the TLS CPU-time write, exactly as CNX does, including before
+libnx initializes its thread marker. A separate libnx check protects HOS 23.0.0's
+new child-thread handle at `0x110`. SDK child-thread handle updates remain in place.
+See [the compatibility notes](docs/ryazhenka-homebrew-compatibility.md) for details
+and the on-console verification procedure.
+
 ![Banner](img/banner.png?raw=true)
 =====
 

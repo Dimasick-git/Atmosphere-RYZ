@@ -36,6 +36,11 @@ namespace ams::mitm::fs {
             };
 
             constexpr const ApplicationWithDynamicHeapInfo ApplicationsWithDynamicHeap[] = {
+                /* Danganronpa V3: Killing Harmony Anniversary Edition. */
+                /* Requirement ? MB. 16 MB stolen heap fixes a crash, though. */
+                /* Unknown heap sensitivity. */
+                { 0x010063F014176000,  16_MB, 0_MB },
+
                 /* Until Then. */
                 /* Requirement ~34 MB. */
                 /* No particular heap sensitivity. */
@@ -45,6 +50,11 @@ namespace ams::mitm::fs {
                 /* Requirement ? MB. 16 MB stolen heap fixes a crash, though. */
                 /* Unknown heap sensitivity. */
                 { 0x01002C9022770000,  16_MB, 0_MB },
+
+                /* Trails in the Sky 2nd Chapter. */
+                /* Requirement ~16 MB.*/
+                /* No particular heap sensitivity. */
+                { 0x01007A2027548000,  8_MB, 0_MB },
 
                 /* STAR WARS: Knights of the Old Republic II: The Sith Lords. */
                 /* Requirement ? MB. 16 MB stolen heap fixes a crash, though. */
